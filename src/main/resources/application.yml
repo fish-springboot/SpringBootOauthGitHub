@@ -1,0 +1,12 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:test
+
+github:
+  base_url: https://api.github.com
+  auth_url: https://github.com/login/oauth/authorize?client_id=1a26cb0e0c0d2225f739
+  token_url: https://github.com/login/oauth/access_token
+  client_id: 1a26cb0e0c0d2225f739
+  client_secret: 40119291bf38b0d815b1fe2d7592b84a3e4b04af
+  token: 9092190491fe82954cff1ba1623b40d62644689d
+  access_token_url: https://github.com/login/oauth/access_token?client_id=${github.client_id}&client_secret=${github.client_secret}&code=
