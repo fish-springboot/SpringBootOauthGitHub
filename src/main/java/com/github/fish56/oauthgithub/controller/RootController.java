@@ -4,8 +4,7 @@ import com.github.fish56.oauthgithub.entity.User;
 import com.github.fish56.oauthgithub.github.MyGitHubClient;
 import com.github.fish56.oauthgithub.pojo.ActionResponse;
 import com.github.fish56.oauthgithub.repository.UserRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -20,18 +19,13 @@ import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @Configuration
+@Slf4j
 public class RootController {
-    private static Logger log = LoggerFactory.getLogger(RootController.class);
+    @Value("${github.auth_url}")
+    private String authUrl;
 
     @Autowired
     private UserRepository userRepository;
-
-    @Value("${github.auth_url}")
-    private String authUrl;
-    @Value("${github.client_id}")
-    private String clientId;
-    @Value("${github.client_secret}")
-    private String clientSecret;
 
     @Autowired
     private MyGitHubClient myGitHubClient;

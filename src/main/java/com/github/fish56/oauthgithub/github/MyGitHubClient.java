@@ -1,31 +1,25 @@
 package com.github.fish56.oauthgithub.github;
 
-import com.github.fish56.axois.Axios;
-import com.github.fish56.axois.response.ResponseEntity;
+import com.alibaba.fastjson.JSONObject;
 import com.github.fish56.oauthgithub.pojo.ActionResponse;
 import com.github.fish56.oauthgithub.util.UrlUtil;
 import com.mashape.unirest.http.HttpResponse;
 import com.mashape.unirest.http.Unirest;
+import lombok.extern.slf4j.Slf4j;
 import org.eclipse.egit.github.core.User;
 import org.eclipse.egit.github.core.client.GitHubClient;
 import org.eclipse.egit.github.core.service.UserService;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 
 import java.io.IOException;
 
+@Slf4j
 @Configuration
 public class MyGitHubClient {
-    private static Logger log = LoggerFactory.getLogger(MyGitHubClient.class);
 
     @Value("${github.access_token_url}")
     private String tokenUrl;
-
-    @Autowired
-    private Axios axios;
 
     public ActionResponse<String> getTokenFromCode(String code){
         ActionResponse<String> actionResponse = new ActionResponse<>();
@@ -72,9 +66,10 @@ public class MyGitHubClient {
         }
 
         var myUser = new com.github.fish56.oauthgithub.entity.User();
-        myUser.setLogin(user.getLogin());
+        String userString = JSONObject.toJSONString(user);
+        log.info("用户信息是：" + userString);
+        myUser = JSONObject.parseObject(userString, com.github.fish56.oauthgithub.entity.User.class);
         myUser.setToken(token);
-        myUser.setEmail(user.getEmail());
         actionResponse.setData(myUser);
 
         return actionResponse;
