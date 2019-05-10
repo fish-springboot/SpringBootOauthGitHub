@@ -15,7 +15,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
 @RestController
 @Configuration
@@ -31,7 +33,7 @@ public class RootController {
     private MyGitHubClient myGitHubClient;
 
     @RequestMapping("/github/login")
-    public Object login(@RequestParam String code) throws Exception{
+    public Object login(@RequestParam String code, HttpServletResponse response) throws Exception{
         ActionResponse<String> actionResponse = myGitHubClient.getTokenFromCode(code);
 
         if (actionResponse.hasError()) {
@@ -50,25 +52,35 @@ public class RootController {
                     .body(userActionResponse.getErrorMessage());
         }
 
+        // 将用户信息保存到数据库
+        userRepository.save(userActionResponse.getData());
+
         log.info("请求完成");
+        Cookie cookie = new Cookie("github_t", token);
+        cookie.setHttpOnly(false);
+        cookie.setMaxAge(20000);
+        cookie.setPath("/"); // 不设置的话默认为当前路由/github，肯定是不行的
+        response.addCookie(cookie);
+
         // 返回数据，并设置token
         return ResponseEntity.status(200)
-                // 为什么读取不到token。。。。
-                .header("Set-Cookie", "token=" + token + "; path=/;")
                 .body(userActionResponse.getData());
     }
 
     @RequestMapping("/**")
-    public ResponseEntity root(@CookieValue(required = false) String token, HttpServletRequest request){
+    public ResponseEntity root(@CookieValue(required = false) String github_t, HttpServletRequest response){
         // 对于未登录用户，跳转到登录页面
-        if (token == null) {
+        if (github_t == null) {
+            log.info("为携带token的用户来访问了");
             return ResponseEntity.status(HttpStatus.TEMPORARY_REDIRECT)
                     .header("Location", authUrl).build();
         }
+        log.info("token为" + github_t + "尝试登录");
 
         // 对于携带token的用户，验证token的有效性
-        User user = userRepository.findByToken(token);
+        User user = userRepository.findByToken(github_t);
         if (user == null) {
+            log.info("登录失败");
             return ResponseEntity.status(HttpStatus.TEMPORARY_REDIRECT)
                     .header("Location", authUrl).build();
         }
