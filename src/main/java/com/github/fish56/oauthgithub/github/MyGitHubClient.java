@@ -21,6 +21,10 @@ public class MyGitHubClient {
     @Value("${github.access_token_url}")
     private String tokenUrl;
 
+    /**
+     * 通过Oauth中的code向服务器获取token
+     * @return token
+     */
     public ActionResponse<String> getTokenFromCode(String code){
         ActionResponse<String> actionResponse = new ActionResponse<>();
 
@@ -48,6 +52,10 @@ public class MyGitHubClient {
         return actionResponse.setData(token);
     }
 
+    /**
+     * 通过token向服务器获取用户信息
+     * @return 用户对象
+     */
     public ActionResponse<com.github.fish56.oauthgithub.entity.User> getUserFromToken(String token) {
         ActionResponse<com.github.fish56.oauthgithub.entity.User> actionResponse = new ActionResponse<>();
 
@@ -59,7 +67,7 @@ public class MyGitHubClient {
             user = userService.getUser();
         } catch (IOException e) {
             e.printStackTrace();
-            log.warn("IO异常： " + e.getMessage());
+            log.error("IO异常： " + e.getMessage());
             actionResponse.setErrorMessage(e.getMessage());
             actionResponse.setErrorStatus(500);
             return actionResponse;
